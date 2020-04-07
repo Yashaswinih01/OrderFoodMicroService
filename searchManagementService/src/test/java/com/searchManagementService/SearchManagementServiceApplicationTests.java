@@ -1,10 +1,10 @@
-package com.orderManagement.zuulgatewayservice;
+package com.searchManagementService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApplicationTests {
+class SearchManagementServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
