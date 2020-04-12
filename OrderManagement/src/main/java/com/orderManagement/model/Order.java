@@ -13,14 +13,20 @@ import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @Entity
 @Table(name="orderdetails")
+@JsonInclude(Include.NON_NULL)
+
 public class Order {
 	
 	@Id
@@ -30,6 +36,7 @@ public class Order {
 	private int orderId;
 	private String restId;
 	private String userId;
+	
 	@Transient
 	private List<String> itemIdList;
 	@JsonFormat(pattern="dd-MM-yyyy hh:mm:ss")
@@ -38,10 +45,11 @@ public class Order {
 	
 	@JsonFormat(pattern="yyyy-MM-dd hh:mm:ss")
 	private Date deliveryTime;
-	@Transient
+	
 	private double totalPrice;
 	@Column(name="delivery_boy")
 	private String deliveryBoyName;
+	private String orderStatus;
 	
 	public int getOrderId() {
 		return orderId;
@@ -90,6 +98,12 @@ public class Order {
 	}
 	public void setDeliveryBoyName(String deliveryBoyName) {
 		this.deliveryBoyName = deliveryBoyName;
+	}
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
 	}
 	
 

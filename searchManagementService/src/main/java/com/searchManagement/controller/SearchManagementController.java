@@ -22,7 +22,7 @@ public class SearchManagementController {
 	@Autowired
     private KafkaTemplate<String, List<Restaurant>> kafkaTemplate;
 
-    private static final String TOPIC = "Kafka_Example";
+    private static final String TOPIC = "Kafka_Example2";
 
   
     /**
@@ -58,7 +58,9 @@ public class SearchManagementController {
 	@SuppressWarnings("unchecked")
 	@GetMapping("/searchByRating/{rating}")
 	public List<Restaurant> searchByRating(@PathVariable("rating") double rating) {
-		return searchManagementService.searchByRating(rating);
+		List<Restaurant> data =searchManagementService.searchByRating(rating);
+		kafkaTemplate.send(TOPIC, data);
+		return data;
 		
 	}
 	
