@@ -1,14 +1,13 @@
-/*package com.searchManagementService;
+package com.config.server.SpringCloudConfigServer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SearchManagementServiceApplicationTests {
+class SpringCloudConfigServerApplicationTests {
 
 	@Test
 	void contextLoads() {
 	}
 
 }
-*/

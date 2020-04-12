@@ -8,7 +8,9 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,13 @@ public class OrderManagementService {
 	@Autowired
 	OrderItemRepository orderItemRepository;
 	
+	
+	
+	enum OrderStatus 
+	{ 
+	    ORDERED, DELIVERED, PROCESSING; 
+	} 
+	
 	static List<String> deliveryBoysList=Arrays.asList("Deepak","Ganesh","Ravi","Mahesh","Harish","Prathap");
 	
 	
@@ -46,7 +55,9 @@ public class OrderManagementService {
 		setOrderAndDeliveryTime(order);
 		Random random=new Random();
 		order.setDeliveryBoyName(deliveryBoysList.get(random.nextInt(6)));
+		order.setOrderStatus(OrderStatus.ORDERED.toString());
 		Order persistedOrder=orderManagementRepository.save(order);
+	
 		String  result=calculateTotalPrice(persistedOrder);
 		return "\n Your order is successfully placed !!!! \n Your order Id is : "+String.valueOf(persistedOrder.getOrderId()) +""
 				+ result;
@@ -64,18 +75,27 @@ public class OrderManagementService {
 		List<Item> itemsList=new ArrayList<>();
 		String priceDetials="";
 		int orderId=order.getOrderId();
+		System.out.println("itrf " +itemIdList);
 		for(String item:itemIdList) {
+		
 			Optional<Item> item2=itemRepositoryImpl.findById(item);
+		
 			if(item2.isPresent()){
 				Item fetchedItem=item2.get();
+				
 				itemsList.add(fetchedItem);
 				priceDetials += fetchedItem.getItemName() + " : " + fetchedItem.getPrice() + " Rs" + "\n";
 				totalPrice+= item2.get().getPrice();
+				
 				saveItemnOrderDetails(fetchedItem.getItemId(),orderId);
 			}	
 		}
 		double gst=totalPrice*0.05;
+		System.out.println("ORer id 4 " + orderId);
 		totalPrice+=gst;
+		order.setTotalPrice(totalPrice);
+		orderManagementRepository.save(order);
+		System.out.println("ORer id 5 " + orderId); 
 		String response ="\n\nPrice Details:\n" + priceDetials
 							+ "GST= " + gst + " Rs"
 		              + "\n \nYour total order cost Incl GST = " + totalPrice +" Rs" ;
@@ -108,6 +128,45 @@ public class OrderManagementService {
 		Date deliveryTime=new Date(t + (30*ONE_MINUTE_IN_MILLIS));
 		order.setDeliveryTime(deliveryTime);
 		order.setOrderTime(currentTime);	
+	}
+	
+	@KafkaListener(topics = "Order", groupId = "group_id")
+	public void viewOrderDetails(String message) {
+		 char id = message.charAt(message.indexOf(":")+2);
+		 String orderId=Character.toString(id);
+		 updateOrderStatus(Integer.parseInt(orderId)); 
+	}
+
+	
+	private void updateOrderStatus(Integer orderId) {
+		Optional<Order> fetchedOrder=orderManagementRepository.findById(orderId);
+		
+		if(fetchedOrder.isPresent()) {
+		
+			Order order=fetchedOrder.get();
+			order.setOrderStatus(OrderStatus.PROCESSING.toString());
+			orderManagementRepository.save(order);
+		}	
+		
+	}
+
+
+	public void updateOrderDetails(String string) {
+		List<Order> orderList=orderManagementRepository.findAll();
+		List<Order> persistList=new ArrayList<>();
+		for(Order order:orderList) {
+			Date deliveryTime=order.getDeliveryTime();
+			Date curDate=new Date();
+			if(curDate.compareTo(deliveryTime) >0) {
+				order.setOrderStatus(OrderStatus.DELIVERED.toString());
+				persistList.add(order);
+								
+			}
+		}
+		if(!persistList.isEmpty()) {
+			orderManagementRepository.saveAll(persistList);
+		}
+		
 	}
 
 }

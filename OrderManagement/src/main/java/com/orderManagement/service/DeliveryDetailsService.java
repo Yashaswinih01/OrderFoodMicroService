@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.orderManagement.Repository.OrderManagementRepository;
 import com.orderManagement.Repository.RestautantRepository;
+import com.orderManagement.config.FeignClientConfig;
 import com.orderManagement.model.Order;
 import com.orderManagement.model.Restaurant;
 import com.orderManagement.model.User;
@@ -25,6 +28,11 @@ public class DeliveryDetailsService {
 	@Autowired
 	RestautantRepository restautantRepository;
 
+	@Autowired
+	FeignClientConfig feignClient;
+	
+	@Autowired
+	RestTemplate restTemplate;
 	
 	/**
 	 * This service method retrieves the order details from ordermanagementReposioty for the particular order Id.
@@ -62,8 +70,6 @@ public class DeliveryDetailsService {
 		return allOrder;
 	}
 	
-	@Autowired
-	RestTemplate restTemplate;
 	
 	
 	
@@ -76,16 +82,27 @@ public class DeliveryDetailsService {
 	 * @param orderId
 	 * @return
 	 */
-	@HystrixCommand(fallbackMethod="userDetailsFallBack")
+	@HystrixCommand(fallbackMethod="userDetailsFallBack",
+			 commandProperties = {
+				      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "1000"),
+				      @HystrixProperty(name = "circuitBreaker.requestVolumeThreshold", value = "6"),
+				      @HystrixProperty(name = "circuitBreaker.errorThresholdPercentage", value = "50"),
+				      @HystrixProperty(name = "circuitBreaker.sleepWindowInMilliseconds", value = "5000")
+				   })
 	public User getUserDetails(int orderId) {
 		User user=null;
 		Optional<Order> order=orderManagementRepository.findById(orderId);
 		if(order.isPresent()) {
 			String userId=order.get().getUserId();
-			String url="http://user-management-service/userDetails/" + userId;
-			user=restTemplate.getForObject(url, User.class);
+			/*String url="http://user-management-service/userDetails/" + userId;
+			user=restTemplate.getForObject(url, User.class);*/
+			
+	     user= feignClient.getUserDetailsById(userId).getBody();
+			
+			//System.out.println("in feign");
 		}else {
 			throw new InvalidParameterException("Order Id is not valid !! Please enter valid Order ID ");
+			
 		}
 		
 		return user;
@@ -100,6 +117,9 @@ public class DeliveryDetailsService {
 	 * @return
 	 */
 	public User userDetailsFallBack(int orderId) {
+		System.out.println("in fall back");
 		return new User();
 	}
+	
+	
 }
