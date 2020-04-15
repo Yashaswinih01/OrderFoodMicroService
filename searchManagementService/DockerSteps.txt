@@ -1,0 +1,71 @@
+1) Build the jar 
+2)Dockerfile to the project 
+	FROM openjdk:8
+	ADD target/UserManagementService-0.0.1-SNAPSHOT.jar user-service.jar
+	EXPOSE 9083
+	ENTRYPOINT ["java","-jar","user-service.jar"]
+3) go to this directory in cmd and do docker build 
+	docker built . -t user-service
+
+4) docker run -p 9081:9081 --link mysql-db --link bold_pasteur:yashaswinih01/userservice search-service
+
+eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka
+
+docker run -p 9082:9082 --network mynetwork yashaswinih01/order-service2
+
+docker run --name eureka-server -p 8761:8761 -d --network mynetwork yashaswinih01/discovery-server-eureka
+
+docker run --name mysql-db -d --network mynetwork -e MYSQL_ROOT_PASSWORD=password --volumes-from mysqlvol2  -e MYSQL_USER=user -e MYSQL_PASSWORD=password -d mysql/mysql-server:latest
+
+
+
+
+docker pull mysql/mysql-server:latest
+
+docker create -v /var/lib/mysql --name mysqlvol mysql/mysql-server:latest
+
+docker run --name mysql-db -e MYSQL_ROOT_PASSWORD=password --volumes-from mysqlvol2  -e MYSQL_USER=user -e MYSQL_PASSWORD=password -d mysql/mysql-server:latest
+
+
+docker run -p 9083:9083 --link a05ddfbdab39 --link 0a6f9de032ba yashaswinih01/userservice
+
+docker run -p 8761:8761 --link fe3de6139b57 yashaswinih01/discovery-server-eureka
+
+MYSQL_DATABASE=project
+
+
+
+docker network create mynetwork
+
+docker run --name eureka-server -p 8761:8761 -d --network mynetwork yashaswinih01/discovery-server-eureka
+
+
+
+
+
+
+
+docker run -dit openjdk:8-jdk-alpine
+
+docker container cp target/UserManagementService-0.0.1-SNAPSHOT.jar a28a8a60bbf4a86779abb83
+3b7f195836afed04805f5177f5bfd4defa7bbc4f0:/
+
+docker container exec romantic_aryabhata ls //frosty_bouman
+
+docker container commit --change="CMD java -jar /UserManagementService-0.0.1-SNAPSHOT.jar" frosty_bouman yashaswinih01/orderfood/UserManagementService:v1
+
+repo should b e lower case
+ 
+
+docker run --name mysql-db -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=project -e MYSQL_USER=user -e MYSQL_PASSWORD=password -d mysql:8
+
+
+
+
+
+
+
+
+
+
+
